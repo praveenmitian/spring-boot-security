@@ -2,6 +2,7 @@ package com.praveen.springbootsecurity;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -20,6 +21,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .withUser("blah")
                 .password("blah")
                 .roles("ADMIN");
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        /*http.authorizeRequests()
+                .antMatchers("/","static/css", "static/js").permitAll()
+                .antMatchers("/**")
+                .hasRole("ADMIN")
+                .and()
+                .formLogin();*/
+
+        //Most restrictive to least trstrictive
+        http.authorizeRequests()
+                .antMatchers("/admin").hasRole("ADMIN")
+                .antMatchers("/user").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/").permitAll()
+                .and().formLogin();
     }
 
     @Bean
