@@ -1,8 +1,9 @@
 package com.praveen.springbootsecurity.service;
 
-import com.praveen.springbootsecurity.model.Product;
 import com.praveen.springbootsecurity.model.Student;
-import com.sun.tools.javac.util.List;
+
+import java.util.List;
+
 
 public interface StudentService {
     List<Student> getAllStudents();
