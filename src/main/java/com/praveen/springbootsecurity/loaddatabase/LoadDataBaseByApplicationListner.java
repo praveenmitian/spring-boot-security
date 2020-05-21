@@ -25,7 +25,7 @@ public class LoadDataBaseByApplicationListner implements ApplicationListener<Con
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        loadProducts();
+       // loadProducts();
         loadStudent();
     }
 

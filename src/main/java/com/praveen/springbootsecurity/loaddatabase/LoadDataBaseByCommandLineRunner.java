@@ -18,7 +18,7 @@ public class LoadDataBaseByCommandLineRunner {
 
     public CommandLineRunner loadDataBase(StudentRepository studentRepository, ProductRepository productRepository){
         return args -> {logger.info(studentRepository.save(new Student(1, "Praveen")).toString());
-        logger.info(productRepository.save(loadProduct()).toString());
+        //logger.info(productRepository.save(loadProduct()).toString());
         };
     }
 
