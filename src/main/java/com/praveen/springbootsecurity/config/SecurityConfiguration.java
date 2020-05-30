@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.praveen.springbootsecurity.config.ApplicationUserPermission.*;
 import static com.praveen.springbootsecurity.config.ApplicationUserRole.*;
@@ -41,7 +44,29 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 //.antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
                 //.antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(COURSE_WRITE.getPermission())
                 //.antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
-                .anyRequest().authenticated().and().httpBasic();
+                .anyRequest()
+                .authenticated()
+                .and()
+                .formLogin()
+                    .loginPage("/login")
+                    .permitAll()
+                    .defaultSuccessUrl("/courses", true)
+                    //.usernameParameter("username") //We can change name here there fore we need to change in html also,
+                    // like usernamexyz in html also the name should be usernamexyz same for password and remember me
+                    //.passwordParameter("password")
+                .and()
+                .rememberMe()
+                    .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
+                    .key("Praveen")
+                    //.rememberMeParameter("remember-me")
+                .and()
+                .logout()
+                    .logoutUrl("/logout")
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login");
         //http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/h2-consolFe/**").permitAll().and().csrf().disable().headers().frameOptions().disable();
         //http.authorizeRequests().antMatchers("/h2-console/**").permitAll().and().csrf().disable().headers().frameOptions().disable();
     }
