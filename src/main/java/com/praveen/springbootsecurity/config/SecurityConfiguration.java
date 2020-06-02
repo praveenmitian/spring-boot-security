@@ -1,9 +1,12 @@
 package com.praveen.springbootsecurity.config;
 
+import com.praveen.springbootsecurity.auth.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,9 +29,14 @@ import static com.praveen.springbootsecurity.config.ApplicationUserRole.*;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final ApplicationUserService applicationUserService;
 
+    @Autowired
+    public SecurityConfiguration(PasswordEncoder passwordEncoder, ApplicationUserService applicationUserService) {
+        this.passwordEncoder = passwordEncoder;
+        this.applicationUserService = applicationUserService;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -71,24 +79,38 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         //http.authorizeRequests().antMatchers("/h2-console/**").permitAll().and().csrf().disable().headers().frameOptions().disable();
     }
 
-    @Override
-    @Bean
-    protected UserDetailsService userDetailsService() {
-        System.out.println("ROLE: " + STUDENT.name());
-        System.out.println("ROLE: " + STUDENT.values().toString());
-        UserDetails narainUser = User.builder().username("narain").password(passwordEncoder.encode("pass"))
-                //.roles(STUDENT.name())
-                .authorities(STUDENT.grantedAuthorities())
-                .build();
-        UserDetails saranUser = User.builder().username("saran").password(passwordEncoder.encode("pass123"))
-                //.roles(ADMIN.name())
-                .authorities(ADMIN.grantedAuthorities())
-                .build();
-        UserDetails karthiUser = User.builder().username("karthi").password(passwordEncoder.encode("pass123"))
-                //.roles(ADMINTRAINEE.name())
-                .authorities(ADMINTRAINEE.grantedAuthorities())
-                .build();
+//    @Override
+//    @Bean
+//    protected UserDetailsService userDetailsService() {
+//        System.out.println("ROLE: " + STUDENT.name());
+//        System.out.println("ROLE: " + STUDENT.values().toString());
+//        UserDetails narainUser = User.builder().username("narain").password(passwordEncoder.encode("pass"))
+//                //.roles(STUDENT.name())
+//                .authorities(STUDENT.grantedAuthorities())
+//                .build();
+//        UserDetails saranUser = User.builder().username("saran").password(passwordEncoder.encode("pass123"))
+//                //.roles(ADMIN.name())
+//                .authorities(ADMIN.grantedAuthorities())
+//                .build();
+//        UserDetails karthiUser = User.builder().username("karthi").password(passwordEncoder.encode("pass123"))
+//                //.roles(ADMINTRAINEE.name())
+//                .authorities(ADMINTRAINEE.grantedAuthorities())
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(narainUser, saranUser, karthiUser);
+//    }
 
-        return new InMemoryUserDetailsManager(narainUser, saranUser, karthiUser);
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(applicationUserService);
+        return provider;
     }
 }
